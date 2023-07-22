@@ -89,7 +89,7 @@ def load_class(template, file_path):
     return template_class
 
 if __name__ == '__main__':
-    tsg_file_path = os.path.join('TSGs', 'HelloWorldTSG', 'TSGfile')
+    tsg_file_path = os.path.join('TSGs', 'HelloWorldTSG', 'TSGfile.yaml')
     tsg_yaml = load_yaml(tsg_file_path)
     pipeline = build(tsg_yaml, tsg_file_path, namespace='my_namespace', cluster='my_cluster')
     pipeline.run()
