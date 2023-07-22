@@ -1,0 +1,62 @@
+Name: hello_world_tsg
+
+Inputs:
+- namespace
+- cluster
+
+Steps:
+- Task: Core/Tasks/HelloTask
+  Name: hello_task
+  Outputs:
+  - hello_message
+
+- Checkpoint: Core/Checkpoints/HelloCheckpoint
+  Name: hello_checkpoint
+  Inputs:
+  - hello_task.hello_message
+  Rules:
+  - "The output should say hello to world"
+  - "The output should say hello to SmartTSG"
+
+- Task: GetPodsUnderNamespaceTask
+  Name: get_pods_under_namespace
+  Inputs:
+  - hello_world_tsg.namespace
+  - hello_world_tsg.cluster
+  Outputs:
+  - pod_names
+  - pod_status
+
+- Task: GetPodsLogTask
+  Name: get_pods_log
+  Inputs:
+  - get_pods_under_namespace.pod_names
+  - hello_world_tsg.namespace
+  - hello_world_tsg.cluster
+  Outputs:
+  - pod_logs
+
+- Checkpoint: PodsLogCheckpoint
+  Name: pods_log_checkpoint
+  Inputs:
+  - get_pods_under_namespace.pod_names
+  - get_pods_log.pod_logs
+  Rules:
+  - "There should be no exceptions in any of the logs"
+
+- Task: GetPodsEventTask
+  Name: get_pods_event
+  Inputs:
+  - get_pods_under_namespace.pod_names
+  - hello_world_tsg.namespace
+  - hello_world_tsg.cluster
+  Outputs:
+  - pod_events
+
+- Checkpoint: PodsEventCheckpoint
+  Name: pods_event_checkpoint
+  Inputs:
+  - get_pods_under_namespace.pod_names
+  - get_pods_event.pod_events
+  Rules:
+  - "There should be no unhealthy events in any of the pods"
