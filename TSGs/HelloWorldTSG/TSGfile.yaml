@@ -1,17 +1,22 @@
-Name: hello_world_tsg
+Id: hello_world_tsg
 
 Inputs:
 - namespace
 - cluster
 
 Steps:
-- Task: Core/Tasks/HelloTask
-  Name: hello_task
+- Task: Core.Tasks.HelloTask
+  Id: hello_task
   Outputs:
   - hello_message
 
-- Checkpoint: Core/Checkpoints/HelloCheckpoint
-  Name: hello_checkpoint
+- Checkpoint: Core.Checkpoints.HelloBasicCheckpoint
+  Id: hello_basic_checkpoint
+  Inputs:
+  - hello_task.hello_message
+
+- Checkpoint: Core.Checkpoints.HelloGptCheckpoint
+  Id: hello_gpt_checkpoint
   Inputs:
   - hello_task.hello_message
   Rules:
@@ -19,7 +24,7 @@ Steps:
   - "The output should say hello to SmartTSG"
 
 - Task: GetPodsUnderNamespaceTask
-  Name: get_pods_under_namespace
+  Id: get_pods_under_namespace
   Inputs:
   - hello_world_tsg.namespace
   - hello_world_tsg.cluster
@@ -28,7 +33,7 @@ Steps:
   - pod_status
 
 - Task: GetPodsLogTask
-  Name: get_pods_log
+  Id: get_pods_log
   Inputs:
   - get_pods_under_namespace.pod_names
   - hello_world_tsg.namespace
@@ -37,7 +42,7 @@ Steps:
   - pod_logs
 
 - Checkpoint: PodsLogCheckpoint
-  Name: pods_log_checkpoint
+  Id: pods_log_checkpoint
   Inputs:
   - get_pods_under_namespace.pod_names
   - get_pods_log.pod_logs
@@ -45,7 +50,7 @@ Steps:
   - "There should be no exceptions in any of the logs"
 
 - Task: GetPodsEventTask
-  Name: get_pods_event
+  Id: get_pods_event
   Inputs:
   - get_pods_under_namespace.pod_names
   - hello_world_tsg.namespace
@@ -54,7 +59,7 @@ Steps:
   - pod_events
 
 - Checkpoint: PodsEventCheckpoint
-  Name: pods_event_checkpoint
+  Id: pods_event_checkpoint
   Inputs:
   - get_pods_under_namespace.pod_names
   - get_pods_event.pod_events

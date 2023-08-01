@@ -13,7 +13,8 @@ class TaskBase(StepBase):
         self.output_keys = output_keys
         self.parent_store = None
 
-        assert self.output_keys is not None and len(self.output_keys) > 0, f"Task {self.name} output keys is None or empty."
+        assert self.output_keys is not None and len(
+            self.output_keys) > 0, f"Task {self.name} output keys is None or empty."
 
     def run(self):
         logging.debug(f"Task {self.name} running.")
@@ -21,7 +22,7 @@ class TaskBase(StepBase):
 
         result = self.work()
         assert result is not None, f"Task {self.name} result is None."
-        
+
         assert self.output_keys is not None, f"Task {self.name} output keys is None."
         if len(self.output_keys) == 1:
             self.outputs = {self.output_keys[0]: result}
