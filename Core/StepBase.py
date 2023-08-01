@@ -1,9 +1,7 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 
-class StepBase:
-    __metaclass__ = ABCMeta
-
+class StepBase(ABC):
     name: str
     parent_store: dict | None
     inputs: list | None
