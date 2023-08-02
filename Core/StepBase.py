@@ -21,14 +21,12 @@ class StepBase(ABC):
             return True
 
         for inp in self.inputs:
-            if inp.value:
-                continue
-
-            try:
-                inp.value = self.parent_store[inp.ref]
-            except KeyError:
-                logging.error(f'Step {self.name} failed to build inputs: {inp.name} can not reference {inp.ref}.')
-                return False
+            if not inp.value:
+                try:
+                    inp.value = self.parent_store[inp.ref]
+                except KeyError:
+                    logging.error(f'Step {self.name} failed to build inputs: {inp.name} can not reference {inp.ref}.')
+                    return False
             
             setattr(self, inp.name, inp.value)
     
