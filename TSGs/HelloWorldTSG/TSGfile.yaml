@@ -1,5 +1,3 @@
-Id: hello_world_tsg
-
 Inputs:
 - namespace
 - cluster
@@ -13,12 +11,16 @@ Steps:
 - Checkpoint: Core.Checkpoints.HelloBasicCheckpoint
   Id: hello_basic_checkpoint
   Inputs:
-  - hello_task.hello_message
+  - Name: message
+    Ref: hello_task.hello_message
+  - Name: another_message
+    Value: "A test value message"
 
 - Checkpoint: Core.Checkpoints.HelloGptCheckpoint
   Id: hello_gpt_checkpoint
   Inputs:
-  - hello_task.hello_message
+  - Name: message
+    Ref: hello_task.hello_message
   Rules:
   - "The output should say hello to world"
   - "The output should say hello to SmartTSG"
@@ -26,8 +28,10 @@ Steps:
 - Task: GetPodsUnderNamespaceTask
   Id: get_pods_under_namespace
   Inputs:
-  - hello_world_tsg.namespace
-  - hello_world_tsg.cluster
+  - Name: namespace
+    Ref: namespace
+  - Name: cluster
+    Ref: cluster
   Outputs:
   - pod_names
   - pod_status
@@ -35,33 +39,43 @@ Steps:
 - Task: GetPodsLogTask
   Id: get_pods_log
   Inputs:
-  - get_pods_under_namespace.pod_names
-  - hello_world_tsg.namespace
-  - hello_world_tsg.cluster
+  - Name: pod_names
+    Ref: get_pods_under_namespace.pod_names
+  - Name: namespace
+    Ref: namespace
+  - Name: cluster
+    Ref: cluster
   Outputs:
   - pod_logs
 
 - Checkpoint: PodsLogCheckpoint
   Id: pods_log_checkpoint
   Inputs:
-  - get_pods_under_namespace.pod_names
-  - get_pods_log.pod_logs
+  - Name: pod_names
+    Ref: get_pods_under_namespace.pod_names
+  - Name: pod_logs
+    Ref: get_pods_log.pod_logs
   Rules:
   - "There should be no exceptions in any of the logs"
 
 - Task: GetPodsEventTask
   Id: get_pods_event
   Inputs:
-  - get_pods_under_namespace.pod_names
-  - hello_world_tsg.namespace
-  - hello_world_tsg.cluster
+  - Name: pod_names
+    Ref: get_pods_under_namespace.pod_names
+  - Name: namespace
+    Ref: namespace
+  - Name: cluster
+    Ref: cluster
   Outputs:
   - pod_events
 
 - Checkpoint: PodsEventCheckpoint
   Id: pods_event_checkpoint
   Inputs:
-  - get_pods_under_namespace.pod_names
-  - get_pods_event.pod_events
+  - Name: pod_names
+    Ref: get_pods_under_namespace.pod_names
+  - Name: pod_events
+    Ref: get_pods_event.pod_events
   Rules:
   - "There should be no unhealthy events in any of the pods"

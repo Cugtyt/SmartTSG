@@ -4,6 +4,7 @@ import importlib
 import importlib.util
 import yaml
 
+from Core.StepBase import StepInput
 from Core.TaskBase import TaskBase
 from Core.TSGPipeline import TSGPipeline
 from Core.CheckpointBase import CheckpointBase
@@ -20,9 +21,8 @@ def load_yaml(tsg_file_path):
 def build(tsg_file_path, **kwargs):
     tsg_yaml = load_yaml(tsg_file_path)
 
-    name = tsg_yaml['Id']
     inputs = tsg_yaml.get('Inputs', [])
-    tsg_pipeline = TSGPipeline(name, inputs, **kwargs)
+    tsg_pipeline = TSGPipeline(inputs, **kwargs)
     for step_yaml in tsg_yaml['Steps']:
         step = None
         if 'Task' in step_yaml.keys():
@@ -36,10 +36,19 @@ def build(tsg_file_path, **kwargs):
     return tsg_pipeline
 
 
+def build_inputs(step):
+    inputs = step.get('Inputs', [])
+    step_inputs = []
+    for input in inputs:
+        step_inputs.append(StepInput(
+            input.get('Name'), input.get('Value'), input.get('Ref')))
+    return step_inputs
+
+
 def build_task(task_step, tsg_file_path) -> TaskBase:
     task_template = task_step['Task']
     task_name = task_step['Id']
-    task_inputs = task_step.get('Inputs', [])
+    task_inputs = build_inputs(task_step)
     task_output_keys = task_step.get('Outputs', [])
 
     task_class = load_class(task_template, tsg_file_path)
@@ -55,7 +64,7 @@ def build_task(task_step, tsg_file_path) -> TaskBase:
 def build_checkpoint(checkpoint_step, tsg_file_path) -> CheckpointBase:
     checkpoint_template = checkpoint_step['Checkpoint']
     checkpoint_name = checkpoint_step['Id']
-    checkpoint_inputs = checkpoint_step.get('Inputs', [])
+    checkpoint_inputs = build_inputs(checkpoint_step)
     checkpoint_rules = checkpoint_step.get('Rules', [])
 
     checkpoint_class = load_class(checkpoint_template, tsg_file_path)
@@ -77,7 +86,8 @@ def load_class(template, tsg_file_path):
         tsg_file_path = os.path.normpath(tsg_file_path)
         path_split = tsg_file_path.split(os.sep)
         folder = 'Tasks' if 'Task' in template else 'Checkpoints'
-        module = importlib.import_module('.'.join(path_split[:2] + [folder, template]))
+        module = importlib.import_module(
+            '.'.join(path_split[:2] + [folder, template]))
         template_class = getattr(module, template)
     return template_class
 

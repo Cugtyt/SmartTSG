@@ -1,12 +1,12 @@
 import logging
-from Core.StepBase import StepBase
+from Core.StepBase import StepBase, StepInput
 
 
 class TaskBase(StepBase):
     def __init__(
             self,
             name: str,
-            inputs: list[str] | None,
+            inputs: list[StepInput] | None,
             output_keys: list[str]) -> None:
         self.name = name
         self.inputs = inputs
@@ -30,7 +30,9 @@ class TaskBase(StepBase):
             self.outputs = {k: v for k, v in zip(self.output_keys, result)}
 
         assert self.parent_store is not None, f"Task {self.name} parent store is None."
-        self.parent_store[self.name] = self.outputs
+        
+        for k, v in self.outputs.items():
+            self.parent_store[f'{self.name}.{k}'] = v
 
         logging.debug(f"outputs: {self.outputs}")
         logging.debug(f"Task {self.name} finished.")

@@ -1,14 +1,14 @@
 import logging
 
 from Core.GPTCall import ai_check, FAIL, PASS
-from Core.StepBase import StepBase
+from Core.StepBase import StepBase, StepInput
 
 
 class CheckpointBase(StepBase):
     def __init__(
             self,
             name: str,
-            inputs: list[str],
+            inputs: list[StepInput],
             rules: list[str]) -> None:
         self.name = name
         self.inputs = inputs
